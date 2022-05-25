@@ -28,14 +28,14 @@ ui <- dashboardPage( skin = "green",
   
   dashboardSidebar( 
     
-    menuItem("MonthlySalary", tabName = "monthlySalary", icon = icon("dashboard")), #Salary Input
-    numericInput("Sal", "Salary", value = 40000, min = 0),                              #Salary Input Box
+    menuItem("Input Monthly Salary", tabName = "monthlySalary", icon = icon("dashboard")), #Salary Input
+    numericInput("Sal", "Taxable Monthly Salary ", value =0, min = 0),                              #Salary Input Box
     checkboxInput("Married", "Check if Married", FALSE),
     actionButton("Input", "Enter")),
   
   dashboardBody(
     
-    fluidRow(                                                 #divide body elements
+    fluidRow(
       infoBoxOutput("info_Salary"),                           # infoBoxOutput, value "Output" passed from server
       infoBoxOutput("info_TotalTax"),
       infoBoxOutput("info_MonthlyTax")),
@@ -44,7 +44,7 @@ ui <- dashboardPage( skin = "green",
       box(
         title = "Monthly Total Tax", plotOutput("CumTax")),
       box(
-        title = "Stacked Monthly Total Tax", plotOutput("StackedTax"))
+        title = "Monthly Total Tax Amount Distributed by Tax Bracket", plotOutput("StackedTax"))
       ),
     
     )
@@ -54,41 +54,45 @@ ui <- dashboardPage( skin = "green",
 server <- function(input, output) {
   
   
-  observeEvent(input$Input, {                                     #call the function on click
-    Chart1 <- Salary_Function (input$Sal, input$Married, 1)       #use the self function
-    Chart2 <- Salary_Function(input$Sal,input$Married,2)
+  observeEvent(input$Input, {                                                 #Calculation after pressing enter
     
+    Chart1 <- Salary_Function (input$Sal, input$Married, 1)
+    Chart2 <- Salary_Function(input$Sal,input$Married,2)
+    TotalTax <- sum(Chart1$TotalMonthlyTax)
+    Avg <- TotalTax/12
                     
-    output$CumTax <- renderPlot({ 
+    output$CumTax <- renderPlot({                                             #Plot1
        #Cumulative Tax Table Return
-      g<- ggplot(Chart1, aes(x=Month, y=TotalMonthlyTax,label=TotalMonthlyTax, fill=factor(TotalMonthlyTax))) 
-      g+geom_bar(stat="identity")+geom_text(size = 3, position = position_stack(vjust = 0.7))
-      }, res=75)
+      g<- ggplot(Chart1, aes(x=Month, y=TotalMonthlyTax,label=TotalMonthlyTax, fill=-TotalMonthlyTax)) 
+      g+geom_bar(stat="identity")+geom_text(size = 3, position = position_stack(vjust = 0.7),color="white")+
+        geom_hline(yintercept=Avg,linetype="dashed", color = "green",size =1) + 
+        annotate("text", x = 5, y=Avg+0.1*Avg, label = "Average Tax")
+      }, res=100)
   
-    output$StackedTax <- renderPlot({
+    output$StackedTax <- renderPlot({                                     #Plot2
         #Stacked Tax Table Return
       g<- ggplot(Chart2, aes(x=Month, y = Amount,fill = TaxBracket, label=Amount))
-      g+ geom_bar(stat ="identity") + geom_text(size = 3, position = position_stack(vjust = 0.7))
+      g+ geom_bar(stat ="identity") + 
+        geom_text(data= subset(Chart2,Amount !=0), size = 3, position = position_stack(vjust = 0.7),color="white")+
+        scale_fill_discrete(name = "Yearly Income Tax Bracket", labels = c("Less than 400K", "400K-500K", "500K-700K","700K-2000K","Greater than 2000K"))+
+        geom_hline(yintercept=Avg, linetype="dashed", color = "green",size=1)+
+        annotate("text", x = 5, y=Avg+0.1*Avg, label = "Average Tax")
       }, res =100)
     
-    output$Table_Tax <- renderTable({
-      Chart1
-    }, res=100)
-    
+   
     output$info_Salary <- renderInfoBox({
-      infoBox("Total Taxable Income", paste0(input$Sal*12), icon = icon("credit-card"))
+      infoBox("Total Taxable Yearly Income", paste0(input$Sal*12), icon = icon("credit-card"))
     })
     
     output$info_TotalTax<- renderInfoBox({
-      #Chart1 <- Salary_Function (input$Sal, input$Married, 1)
       TotalTax <- sum(Chart1$TotalMonthlyTax)
-      infoBox("Total Tax Amount", paste0(TotalTax), icon = icon("list"))
+      infoBox("Total Liable Yearly Tax", paste0(TotalTax), icon = icon("list"))
     })
     
     output$info_MonthlyTax<- renderInfoBox({
       #Chart1 <- Salary_Function (input$Sal, input$Married, 1)
-      TotalTax <- sum(Chart1$TotalMonthlyTax)
-      infoBox("Average Tax in a Month", paste0(TotalTax/12), icon = icon("list"))
+      
+      infoBox("Average Monthly Tax", paste0(Avg), icon = icon("list"))
     })
     
     })
