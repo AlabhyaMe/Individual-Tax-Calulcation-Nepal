@@ -35,7 +35,7 @@ ui <- dashboardPage( skin = "green",
   
   dashboardBody(
     
-    fluidRow(
+    fluidRow(                                                 #divide body elements
       infoBoxOutput("info_Salary"),                           # infoBoxOutput, value "Output" passed from server
       infoBoxOutput("info_TotalTax"),
       infoBoxOutput("info_MonthlyTax")),
@@ -54,8 +54,8 @@ ui <- dashboardPage( skin = "green",
 server <- function(input, output) {
   
   
-  observeEvent(input$Input, {
-    Chart1 <- Salary_Function (input$Sal, input$Married, 1)
+  observeEvent(input$Input, {                                     #call the function on click
+    Chart1 <- Salary_Function (input$Sal, input$Married, 1)       #use the self function
     Chart2 <- Salary_Function(input$Sal,input$Married,2)
     
                     
