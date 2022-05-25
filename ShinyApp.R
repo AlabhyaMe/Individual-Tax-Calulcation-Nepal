@@ -59,7 +59,7 @@ server <- function(input, output) {
     Chart1 <- Salary_Function (input$Sal, input$Married, 1)
     Chart2 <- Salary_Function(input$Sal,input$Married,2)
     TotalTax <- sum(Chart1$TotalMonthlyTax)
-    Avg <- TotalTax/12
+    Avg <- round(TotalTax/12,2)
                     
     output$CumTax <- renderPlot({                                             #Plot1
        #Cumulative Tax Table Return
