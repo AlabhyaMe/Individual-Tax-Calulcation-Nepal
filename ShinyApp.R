@@ -66,7 +66,7 @@ server <- function(input, output) {
       g<- ggplot(Chart1, aes(x=Month, y=TotalMonthlyTax,label=TotalMonthlyTax, fill=-TotalMonthlyTax)) 
       g+geom_bar(stat="identity")+geom_text(size = 3, position = position_stack(vjust = 0.7),color="white")+
         geom_hline(yintercept=Avg,linetype="dashed", color = "green",size =1) + 
-        annotate("text", x = 5, y=Avg+0.1*Avg, label = "Average Tax")
+        annotate("text", x = 2, y=Avg+0.1*Avg, label = "Average Tax")
       }, res=100)
   
     output$StackedTax <- renderPlot({                                     #Plot2
@@ -76,7 +76,7 @@ server <- function(input, output) {
         geom_text(data= subset(Chart2,Amount !=0), size = 3, position = position_stack(vjust = 0.7),color="white")+
         scale_fill_discrete(name = "Yearly Income Tax Bracket", labels = c("Less than 400K", "400K-500K", "500K-700K","700K-2000K","Greater than 2000K"))+
         geom_hline(yintercept=Avg, linetype="dashed", color = "green",size=1)+
-        annotate("text", x = 5, y=Avg+0.1*Avg, label = "Average Tax")
+        annotate("text", x = 2, y=Avg+0.1*Avg, label = "Average Tax")
       }, res =100)
     
    
